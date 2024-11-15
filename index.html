@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>XSS Demo</title>
+</head>
+<body>
+    <h1>Search</h1>
+    <form method="GET">
+        <input type="text" name="query" placeholder="Search something...">
+        <button type="submit">Search</button>
+    </form>
+
+    <div id="results">
+        <!-- Vulnerable code -->
+        <p>Search results for: <span id="query"></span></p>
+    </div>
+
+    <script>
+        // Vulnerable to XSS
+        const urlParams = new URLSearchParams(window.location.search);
+        const query = urlParams.get('query');
+        document.getElementById('query').innerHTML = query;
+    </script>
+</body>
+</html>

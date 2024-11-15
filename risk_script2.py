@@ -1,19 +1,29 @@
-import requests
+import sqlite3
+from flask import Flask, request
 
-url = "http://example.com/login"  
+app = Flask(__name__)
 
-payload = "' OR '1'='1' -- "
+# Initialize a sample SQLite database
+conn = sqlite3.connect('users.db', check_same_thread=False)
+cursor = conn.cursor()
+cursor.execute('CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY, username TEXT, password TEXT)')
+conn.commit()
 
-data = {
-    "username": payload,
-    "password": "irrelevant"
-}
+# Vulnerable login route
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    username = request.args.get('username')
+    password = request.args.get('password')
 
-response = requests.post(url, data=data)
+    # Vulnerable SQL query
+    query = f"SELECT * FROM users WHERE username = '{username}' AND password = '{password}'"
+    cursor.execute(query)
+    user = cursor.fetchone()
 
-if response.status_code == 200:
-    print("[+] SQL Injection Test Successful!")
-    print(f"Response: {response.text}")
-else:
-    print("[-] SQL Injection Test Failed.")
-    print(f"HTTP Status Code: {response.status_code}")
+    if user:
+        return "Welcome, " + user[1]
+    else:
+        return "Invalid credentials"
+
+if __name__ == '__main__':
+    app.run(debug=True)
