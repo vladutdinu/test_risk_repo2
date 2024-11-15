@@ -9,15 +9,15 @@ cursor = conn.cursor()
 cursor.execute('CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY, username TEXT, password TEXT)')
 conn.commit()
 
-# Vulnerable login route
+# Secure login route
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     username = request.args.get('username')
     password = request.args.get('password')
 
-    # Vulnerable SQL query
-    query = f"SELECT * FROM users WHERE username = '{username}' AND password = '{password}'"
-    cursor.execute(query)
+    # Secure SQL query using parameterized queries to prevent SQL Injection
+    query = "SELECT * FROM users WHERE username = ? AND password = ?"
+    cursor.execute(query, (username, password))
     user = cursor.fetchone()
 
     if user:
